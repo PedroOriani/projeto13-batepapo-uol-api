@@ -68,7 +68,6 @@ app.post('/messages', async (req, res) => {
 
     try{
         const participant = await db.collection('participants').findOne({name: user})
-
         if(!participant){
             res.sendStatus(422);
             return
@@ -140,7 +139,7 @@ app.post('/status', async (req, res) => {
         if(!user || !participant){
             return res.sendStatus(404);
         }else{
-            await db.collection('participants').updateOne({id: new ObjectId(participant.id)}, {$set: {lastStatus:Date.now()}})
+            await db.collection('participants').updateOne({id: new ObjectId(participant.id)}, {lastStatus: {$set:Date.now()}})
             return res.sendStatus(200);
         }
     }catch (err){
