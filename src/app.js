@@ -1,9 +1,10 @@
 import express  from "express";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import cors from "cors";
 import dayjs from "dayjs";
 import dotenv from 'dotenv';
 import Joi from "joi";
+import { object } from "joi";
 
 dotenv.config()
 const app = express();
@@ -144,8 +145,21 @@ app.post('/status', async (req, res) => {
 
 setInterval(async() => {
     try{
-        const participants = await db.collection('participants').find().toArray()
-    }catch{
+        const participants = await db.collection('participants').find({lastStatus: {$lt: Date.now() - 10000}}).toArray()
 
+        participants.forEach(async p => {
+            const message = {
+                from: p.name,
+                to: 'Todos',
+                text: 'sai da sala...',
+                type: 'status',
+                time: dayjs().format('HH:mm:ss')
+            }
+
+            db.collection('participants').deleteOne({_id: new ObjectId(p.id)});
+            db.collection('messages').insertOne(message);
+        });
+    }catch (err) {
+        return res.status(500).send(err.message);
     }
 }, 15000)
