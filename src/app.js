@@ -4,7 +4,6 @@ import cors from "cors";
 import dayjs from "dayjs";
 import dotenv from 'dotenv';
 import Joi from "joi";
-import { object } from "joi";
 
 dotenv.config()
 const app = express();
@@ -75,8 +74,11 @@ app.post('/messages', async (req, res) => {
     })
 
     const validation = schemaMessage.validate(req.body, {abortEarly: false})
-    if (validation.error || !participant){
+    if (validation.error){
         const errors = validation.error.details.map(detail => detail.message);
+        res.status(422).send(errors);
+        return
+    }else if(!participant){
         res.status(422).send(errors);
         return
     }else{
