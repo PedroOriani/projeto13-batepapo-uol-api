@@ -67,6 +67,12 @@ app.post('/messages', async (req, res) => {
     const { user } = req.headers;
 
     const participant = await db.collection('participants').findOne({name: user})
+
+    if(!participant){
+        res.status(422);
+        return
+    }
+    
     const schemaMessage = Joi.object({
         to: Joi.string().required(),
         text: Joi.string().required(),
@@ -78,10 +84,8 @@ app.post('/messages', async (req, res) => {
         const errors = validation.error.details.map(detail => detail.message);
         res.status(422).send(errors);
         return
-    }else if(!participant){
-        res.status(422).send(errors);
-        return
-    }else{
+    }else{    
+
         const message ={
             from: user,
             to: to,
@@ -89,7 +93,7 @@ app.post('/messages', async (req, res) => {
             type: type,
             time: dayjs().format('HH:mm:ss')
         };
-    
+
         try{
             await db.collection('messages').insertOne(message);
             return res.sendStatus(201)
