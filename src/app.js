@@ -77,16 +77,13 @@ app.post('/messages', async (req, res) => {
         const schemaMessage = Joi.object({
             to: Joi.string().required(),
             text: Joi.string().required(),
-            type: Joi.string().required()
+            type: Joi.string().valid("message", "private_message").required()
         })
 
         const validation = schemaMessage.validate(req.body, {abortEarly: false})
         if (validation.error){
             const errors = validation.error.details.map(detail => detail.message);
             res.status(422).send(errors);
-            return
-        }else if (type !== 'message' || type !== 'private_message'){
-            res.sendStatus(422);
             return
         }else{    
 
