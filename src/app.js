@@ -66,25 +66,29 @@ app.post('/messages', async (req, res) => {
     const { to, text, type } = req.body;
     const { user } = req.headers;
 
-    const participant = await db.collection('participants').findOne({name: user})
+    try{
+        const participant = await db.collection('participants').findOne({name: user})
 
-    if(!participant){
-        res.status(422);
-        return
-    }
-    
-    const schemaMessage = Joi.object({
-        to: Joi.string().required(),
-        text: Joi.string().required(),
-        type: Joi.string().required()
-    })
+        if(!participant){
+            res.sendStatus(422);
+            return
+        }
+        
+        const schemaMessage = Joi.object({
+            to: Joi.string().required(),
+            text: Joi.string().required(),
+            type: Joi.string().required()
+        })
 
-    const validation = schemaMessage.validate(req.body, {abortEarly: false})
-    if (validation.error){
-        const errors = validation.error.details.map(detail => detail.message);
-        res.status(422).send(errors);
-        return
-    }else{    
+        const validation = schemaMessage.validate(req.body, {abortEarly: false})
+        if (validation.error){
+            const errors = validation.error.details.map(detail => detail.message);
+            res.status(422).send(errors);
+            return
+        }else if (type !== 'message' || type !== 'private_message'){
+            res.sendStatus(422);
+            return
+        }else{    
 
         const message ={
             from: user,
@@ -93,13 +97,11 @@ app.post('/messages', async (req, res) => {
             type: type,
             time: dayjs().format('HH:mm:ss')
         };
-
-        try{
             await db.collection('messages').insertOne(message);
             return res.sendStatus(201)
-        }catch (err) {
-            return res.status(500).send(err.message)
         }
+    }catch (err) {
+        return res.status(500).send(err.message)
     }
 })
 
