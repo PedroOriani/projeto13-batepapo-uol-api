@@ -64,10 +64,9 @@ app.get('/participants', async (req, res) => {
 
 app.post('/messages', async (req, res) => {
     const { to, text, type } = req.body;
-    const User = req.headers.user;
+    const { user } = req.headers;
 
     const participant = await db.collection('participants').findOne({name: from})
-
     const schemaMessage = Joi.object({
         to: Joi.string().required(),
         text: Joi.string().required(),
@@ -81,13 +80,8 @@ app.post('/messages', async (req, res) => {
         return;
     }
 
-    if(type !== 'message' || type !== 'private_message'){
-        res.sendStatus(422);
-        return;
-    }
-
     const message ={
-        from: User,
+        from: user,
         to: to,
         text: text,
         type: type,
@@ -103,8 +97,16 @@ app.post('/messages', async (req, res) => {
 })
 
 app.get('/messages', async (req, res) => {
-    const from = req.headers.user;
+    const { user } = req.headers;
+    const { limit } = req.query;
 
+    const message = await db.collection('messages').find({
+        $or: [
+            { from: user },
+            { to:  user},
+            { to: "Todos"}
+        ]
+    }).toArray();
 
 })
 
