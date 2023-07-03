@@ -42,5 +42,5 @@ app.post('/status', async (req, res) => {
 })
 
 setInterval(async() => {
-
+    console.log('15 segundos se passaram')
 }, 15000)
