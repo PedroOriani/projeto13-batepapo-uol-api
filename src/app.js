@@ -67,7 +67,7 @@ app.post('/messages', async (req, res) => {
     const { to, text, type } = req.body;
     const { user } = req.headers;
 
-    const participant = await db.collection('participants').findOne({name: from})
+    const participant = await db.collection('participants').findOne({name: user})
     const schemaMessage = Joi.object({
         to: Joi.string().required(),
         text: Joi.string().required(),
