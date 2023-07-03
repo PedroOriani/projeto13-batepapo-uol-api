@@ -139,7 +139,7 @@ app.post('/status', async (req, res) => {
         if(!user || !participant){
             return res.sendStatus(404);
         }else{
-            await db.collection('participants').updateOne({id: new ObjectId(participant.id)}, {$set:{lastStatus:Date.now()}})
+            await db.collection('participants').updateOne({_id: new ObjectId(participant._id)}, {$set:{lastStatus:Date.now()}})
             return res.sendStatus(200);
         }
     }catch (err){
@@ -160,7 +160,7 @@ setInterval(async() => {
                 time: dayjs().format('HH:mm:ss')
             }
 
-            db.collection('participants').deleteOne({_id: new ObjectId(p.id)});
+            db.collection('participants').deleteOne({_id: new ObjectId(p._id)});
             db.collection('messages').insertOne(message);
         });
     }catch (err) {
