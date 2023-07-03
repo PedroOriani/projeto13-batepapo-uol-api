@@ -100,7 +100,7 @@ app.get('/messages', async (req, res) => {
     const { user } = req.headers;
     const { limit } = req.query;
 
-    const message = await db.collection('messages').find({
+    const messages = await db.collection('messages').find({
         $or: [
             { from: user },
             { to:  user},
@@ -108,6 +108,21 @@ app.get('/messages', async (req, res) => {
         ]
     }).toArray();
 
+    if (limit){
+
+        const schemaLimit = Joi.number().min(1);
+        const { error } = schemaLimit.validate(limit);
+
+        if (error){
+            res.status(422).send(error.message);
+            return
+        }
+
+        res.send(messages.slice(-limit))
+        return
+    }
+
+    res.send(messages);
 })
 
 app.post('/status', async (req, res) => {
@@ -115,5 +130,5 @@ app.post('/status', async (req, res) => {
 })
 
 setInterval(async() => {
-    console.log('15 segundos se passaram')
+    
 }, 15000)
