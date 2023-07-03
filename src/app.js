@@ -139,7 +139,7 @@ app.post('/status', async (req, res) => {
         if(!user || !participant){
             return res.sendStatus(404);
         }else{
-            await db.collection('participants').updateOne({id: new ObjectId(participant.id)}, {lastStatus: {$set:Date.now()}})
+            await db.collection('participants').updateOne({id: new ObjectId(participant.id)}, {$set:{lastStatus:Date.now()}})
             return res.sendStatus(200);
         }
     }catch (err){
