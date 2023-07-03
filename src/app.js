@@ -78,22 +78,22 @@ app.post('/messages', async (req, res) => {
     if (validation.error || !participant){
         const errors = validation.error.details.map(detail => detail.message);
         res.status(422).send(errors);
-        return;
-    }
-
-    const message ={
-        from: user,
-        to: to,
-        text: text,
-        type: type,
-        time: dayjs().format('HH:mm:ss')
-    };
-
-    try{
-        await db.collection('messages').insertOne(message);
-        return res.sendStatus(201)
-    }catch (err) {
-        return res.status(500).send(err.message)
+        return
+    }else{
+        const message ={
+            from: user,
+            to: to,
+            text: text,
+            type: type,
+            time: dayjs().format('HH:mm:ss')
+        };
+    
+        try{
+            await db.collection('messages').insertOne(message);
+            return res.sendStatus(201)
+        }catch (err) {
+            return res.status(500).send(err.message)
+        }
     }
 })
 
