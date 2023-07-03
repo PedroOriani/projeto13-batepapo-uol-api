@@ -40,3 +40,7 @@ app.get('/messages', async (req, res) => {
 app.post('/status', async (req, res) => {
 
 })
+
+setInterval(async() => {
+
+}, 15000)
