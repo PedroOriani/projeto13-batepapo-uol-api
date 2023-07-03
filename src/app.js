@@ -4,7 +4,6 @@ import cors from "cors";
 import dayjs from "dayjs";
 import dotenv from 'dotenv';
 import Joi from "joi";
-import { valid } from "joi";
 
 dotenv.config()
 const app = express();
@@ -31,6 +30,7 @@ app.post('/participants', async (req, res) => {
     if (validation.error){
         const errors = validation.error.details.map(detail => detail.message)
         res.status(422).send(errors)
+        return
     }
 
     try{
@@ -63,7 +63,43 @@ app.get('/participants', async (req, res) => {
 })
 
 app.post('/messages', async (req, res) => {
+    const { to, text, type } = req.body;
+    const from = req.headers.user;
 
+    const participant = await db.collection('participants').findOne({name: from})
+
+    const schemaName = Joi.object({
+        to: Joi.string().required(),
+        text: Joi.string().required(),
+        type: Joi.string().required()
+    })
+
+    const validation = schemaName.validate(req.body, {abortEarly: false})
+    if (validation.error || !participant){
+        const errors = validation.error.details.map(detail => detail.message);
+        res.status(422).send(errors);
+        return;
+    }
+
+    if(type !== 'message' || type !== 'private_message'){
+        res.sendStatus(422);
+        return;
+    }
+
+    const message ={
+        from: from,
+        to: to,
+        text: text,
+        type: type,
+        time: dayjs().format('HH:mm:ss')
+    };
+
+    try{
+        await db.collection('messages').insertOne(message);
+        res.sendStatus(201)
+    }catch (err) {
+        res.status(500).send(err.message)
+    }
 })
 
 app.get('/messages', async (req, res) => {
