@@ -46,6 +46,9 @@ app.post('/participants', async (req, res) => {
                 type: 'status',
                 time: dayjs().format('HH:mm:ss')
             }
+            await db.collection('messages').insertOne(message)
+
+            res.sendStatus(201)
         }else{
             res.status(409).send('Usuário ja cadastrado');
         }
