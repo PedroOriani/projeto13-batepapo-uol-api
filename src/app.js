@@ -90,9 +90,9 @@ app.post('/messages', async (req, res) => {
 
     try{
         await db.collection('messages').insertOne(message);
-        res.sendStatus(201)
+        return res.sendStatus(201)
     }catch (err) {
-        res.status(500).send(err.message)
+        return res.status(500).send(err.message)
     }
 })
 
@@ -126,9 +126,26 @@ app.get('/messages', async (req, res) => {
 })
 
 app.post('/status', async (req, res) => {
+    const user = Buffer.from(req.headers.user, 'latin1').toString('latin1')
 
+    try{
+        const participant = await db.collection('participants').findOne({name: user});
+
+        if(!user || !participant){
+            return res.sendStatus(404);
+        }else{
+            await db.collection('participants').updateOne({id: new ObjectId(participant.id)}, {$set: {lastStatus:Date.now()}})
+            return res.sendStatus(200);
+        }
+    }catch (err){
+        return res.status(500).send(err.message)
+    }  
 })
 
 setInterval(async() => {
-    
+    try{
+        const participants = await db.collection('participants').find().toArray()
+    }catch{
+
+    }
 }, 15000)
